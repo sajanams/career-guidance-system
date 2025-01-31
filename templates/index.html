@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Career Recommendation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .navbar {
+            background-color: #040076;;
+        }
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-title {
+            color: #040076;;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #040076;;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .form-control:focus {
+            border-color: #040076;;
+            box-shadow: none;
+        }
+        .results-section {
+            margin-top: 20px;
+        }
+        .results-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #040076;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Career Recommendation System</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="text-center mb-4">Find Your Dream Job</h1>
+        <div class="row">
+            <!-- Skill-Based Recommendations -->
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h3>Skill-Based Recommendations</h3>
+                    <form id="skillForm">
+                        <div class="mb-3">
+                            <label for="skills" class="form-label">Enter Your Skills:</label>
+                            <input type="text" class="form-control" id="skills" placeholder="e.g., Python, Data Science" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Get Recommendations</button>
+                    </form>
+                    <div id="skillResults" class="results-section"></div>
+                </div>
+            </div>
+
+            <!-- Resume-Based Recommendations -->
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h3>Resume-Based Recommendations</h3>
+                    <form id="resumeForm">
+                        <div class="mb-3">
+                            <label for="resume" class="form-label">Upload Your Resume:</label>
+                            <input type="file" class="form-control" id="resume" accept=".pdf,.docx" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Upload and Analyze</button>
+                    </form>
+                    <div id="resumeResults" class="results-section"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+   
+
+    <!-- JavaScript for Fetch API -->
+    <script>
+        // Handle skill-based form submission
+        document.getElementById("skillForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const skills = document.getElementById("skills").value;
+
+            const response = await fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ skills })
+            });
+
+            const data = await response.json();
+            displayResults(data, "skillResults");
+        });
+
+        // Handle resume-based form submission
+        document.getElementById("resumeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const file = document.getElementById("resume").files[0];
+            const formData = new FormData();
+            formData.append("resume", file);
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            displayResults(data, "resumeResults");
+        });
+
+        // Display results
+        function displayResults(data, elementId) {
+            const resultsDiv = document.getElementById(elementId);
+            resultsDiv.innerHTML = "<h4>Recommended Jobs:</h4>";
+
+            if (data.length === 0) {
+                resultsDiv.innerHTML += "<p>No recommendations found.</p>";
+                return;
+            }
+
+            data.forEach(job => {
+                resultsDiv.innerHTML += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">${job.job_title}</h5>
+                            <p class="card-text"><strong>Skills:</strong> ${job.skills}</p>
+                            <p class="card-text"><strong>Degree Required:</strong> ${job.degree_required}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
